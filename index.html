@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Marquette Buildings by Zoning District</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script
+  src="https://code.jquery.com/jquery-3.4.0.js"
+  integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+  crossorigin="anonymous"></script> 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Raleway|Roboto" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>    
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+<style>
+body { margin:0; padding:0; }
+#map { position:absolute; top:0; bottom:0; width:100%; margin-top: 46px;}
+nav {  height: 46px; line-height: 46px; background-color: black; }
+nav .brand-logo { font-size: 23px; font-family: 'Raleway', sans-serif; }   
+h3 { font-size: 14px !important;}    
+</style>
+</head>
+<body>
+    
+<div class="navbar-fixed">
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#!" class="brand-logo">Marquette Buildings by Zoning District</a>
+        <ul class="right hide-on-med-and-down">          
+          <li><a href="https://www.marquettemi.gov/commission/ordinances/">Zoning Code</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div> 
+<div id='map'></div>
+    
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoicmNvd2xpbmciLCJhIjoiY2lzZ2YwcjZtMDFwdzNvcnQ3bmR3NXFhcCJ9.TI01a_YqNaqKWigFu70x7w';
+var map = new mapboxgl.Map({
+container: 'map', // container id
+style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+center: [-87.3954, 46.5436], // starting position [lng, lat]
+zoom: 14, // starting zoom
+pitch: 45,
+bearing: -17.6    
+});
+    
+// Create a popup, but don't add it to the map yet.
+var popup = new mapboxgl.Popup({
+closeButton: true,
+closeOnClick: false
+});
+
+// Url the of the postgis database php file
+var url = 'buildings.geojson';
+    
+map.on('load', function () { 
+  map.addSource('buildings', { type: 'geojson', data: url });   
+    
+  map.addLayer({
+    'id': 'extrusion',
+    'type': 'fill-extrusion',
+    'source': 'buildings',
+    'paint': {
+      'fill-extrusion-color':  {
+            property: 'land_act',
+            type: 'categorical',    
+            stops: [
+                    ['Downtown Marquette Waterfront', 'blue'],
+                    ['Civic', 'brown'], 
+                    ['default', 'rgba(0,0,0,0)'],
+                    ['General Commercial', 'lime'],
+                    ['Mixed Use', 'Orange'],
+                    ['Regional Commercial', 'white'],
+                    ['Conservation/Recreation', 'green'],
+                    ['Central Commerce', 'teal'],
+                    ['Multi-Family', 'yellow'],
+                    ['Planned Unit Development (PUD)', 'orange'],
+                    ['Third Street Corridor', 'gray'],
+                    ['Municipal', 'silver'],
+                    ['Mobile Home', 'red'],
+                    ['Board of Light & Power', 'pink'],
+                    ['General Residential', 'purple'],
+                    ['Industrial', 'gray'],
+                    ['Single Family', 'olive']
+                   ]
+},
+      'fill-extrusion-height': ['get', 'height3'],
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 1
+    }
+  }); 
+});
+    
+map.on('click', 'extrusion', function (e) {     
+    var feature = e.features[0]; //get the properties of the clicked feature
+    console.log(feature);     
+    popup.setLngLat(e.lngLat)
+        .setHTML('<b>Building name:</b> ' +feature.properties.name + '<br>' + '<b>Zoning District:</b> ' + feature.properties.land_act )
+        .addTo(map);         
+});     
+</script>
+ 
+</body>
+</html>
