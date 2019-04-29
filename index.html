@@ -43,11 +43,14 @@ var map = new mapboxgl.Map({
 container: 'map', // container id
 style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
 center: [-87.3954, 46.5436], // starting position [lng, lat]
-zoom: 14, // starting zoom
-pitch: 45,
+zoom: 15, // starting zoom
+pitch: 60,
 bearing: -17.6    
 });
-    
+
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+          
 // Create a popup, but don't add it to the map yet.
 var popup = new mapboxgl.Popup({
 closeButton: true,
